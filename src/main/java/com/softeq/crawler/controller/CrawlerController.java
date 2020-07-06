@@ -59,15 +59,6 @@ public class CrawlerController {
     }
 
     public static void main(String[] args) {
-//        List<String> params = new ArrayList<>();
-//        params.add("url=https://en.wikipedia.org/wiki/Elon_Musk");
-//        params.add("tags=Tesla,Musk,Gigafactory,Elon Musk");
-//        params.add("path=D:\\test");
-//        params.add("file_name=test.csv");
-//        params.add("top_file_name=top_test.csv");
-//        params.add("height=2");
-//        params.add("pages_limit=20");
-//        params.add("top_limit=3");
         StatisticsCsvRepository repository = new StatisticsCsvRepositoryImpl();
         StatisticsService service = new StatisticsServiceImpl(repository);
         CrawlerController controller = new CrawlerController(service);
