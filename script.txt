@@ -1,0 +1,1 @@
+mvn exec:java -Dexec.mainClass="com.softeq.crawler.controller.CrawlerController" "-Dexec.args=url=https://en.wikipedia.org/wiki/Elon_Musk 'tags=Tesla,Musk,Gigafactory,Elon Musk' path=D:\test file_name=test.csv top_file_name=top_test.csv height=3 pages_limit=10 top_limit=3"
