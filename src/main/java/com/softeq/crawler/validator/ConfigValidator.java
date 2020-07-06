@@ -1,16 +1,22 @@
 package com.softeq.crawler.validator;
 
 import com.softeq.crawler.config.Config;
+import com.softeq.crawler.reader.UrlReader;
 import lombok.extern.log4j.Log4j;
-import org.jsoup.Jsoup;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
 @Log4j
 public class ConfigValidator implements Validator<Config> {
+    private final UrlReader urlReader;
+
+    public ConfigValidator(UrlReader urlReader) {
+        this.urlReader = urlReader;
+    }
+
     @Override
     public ResultValidator validate(Config param) {
         ResultValidator rv = new ResultValidator();
@@ -36,7 +42,7 @@ public class ConfigValidator implements Validator<Config> {
             log.warn("Url is null");
         } else {
             try {
-                Jsoup.connect(url).get();
+                urlReader.readUrls(url);
                 log.info("url is valid " + url);
             } catch (IOException e) {
                 rv.addException("Url", Collections.singletonList("url " + url + " is not valid"));
@@ -71,12 +77,12 @@ public class ConfigValidator implements Validator<Config> {
             rv.addException("Path", Collections.singletonList("Path is null"));
             log.warn("Path is null");
         } else {
-            try {
-                Path.of(path);
+            File file = new File(path);
+            if (file.isDirectory()) {
                 log.info("Path is valid");
-            } catch (Exception e) {
-                rv.addException("FilePath", Collections.singletonList("Path is not valid " + path));
-                log.warn("Path is not valid", e);
+            } else {
+                rv.addException("Path", Collections.singletonList("Path is not valid " + path));
+                log.warn("Path is not valid");
             }
         }
     }

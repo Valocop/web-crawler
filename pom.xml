@@ -65,6 +65,31 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.1.1</version>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.softeq.crawler.controller.CrawlerController</mainClass>
+                            <arguments>
+                                <argument>url=https://en.wikipedia.org/wiki/Elon_Musk</argument>
+                                <argument>tags=Tesla,Musk,Gigafactory,Elon Musk"</argument>
+                                <argument>path=C:\test</argument>
+                                <argument>file_name=test.csv</argument>
+                                <argument>top_file_name=top_test.csv</argument>
+                                <argument>height=2</argument>
+                                <argument>pages_limit=25</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

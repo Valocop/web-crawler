@@ -33,6 +33,9 @@ public class StatisticsScannerImpl implements StatisticsScanner {
             urlNode.getChildNodes().forEach(childNode -> urlNodeTreeScan(childNode, statisticsList, tags, reader));
         } catch (IOException e) {
             log.warn("Failed to scan url " + urlNode.getUrl(), e);
+            Map<String, Long> tagsScan = tagsScan("", tags);
+            Statistics statistics = new Statistics(urlNode.getUrl(), tagsScan, tags);
+            statisticsList.add(statistics);
         }
     }
 

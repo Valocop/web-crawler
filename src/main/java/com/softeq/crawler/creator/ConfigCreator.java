@@ -1,95 +1,116 @@
 package com.softeq.crawler.creator;
 
 import com.softeq.crawler.config.Config;
+import com.softeq.crawler.config.ConfigValues;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.softeq.crawler.config.ConfigValues.valueOfIgnoreCase;
 
 public class ConfigCreator implements Creator<Config> {
     private static final String APP_PROPERTIES = "app.properties";
 
     @Override
-    public Optional<Config> create(List<String> params) throws IOException {
-        Properties properties = new Properties();
-        try (InputStream is = ConfigCreator.class.getResourceAsStream(APP_PROPERTIES)) {
-            properties.load(is);
-        }
-        if (params == null || params.size() < 2) {
-            return Optional.empty();
+    public Config create(List<String> params) throws IOException {
+        if (params == null || params.isEmpty()) {
+            return null;
         } else {
-            Config config = Config.builder()
-                    .rootUrl(params.get(0))
-                    .tags(Arrays.asList(params.get(1).split(",")))
-                    .build();
-            setFilePath(params, properties, config);
-            setFileName(params, properties, config);
-            setTopFileName(params, properties, config);
-            setHeight(params, properties, config);
-            setPagesLimit(params, properties, config);
-            setTopLimit(params, properties, config);
-            return Optional.of(config);
+            Config config = new Config();
+            Properties properties = new Properties();
+            Path appProp = Path.of("src", "main", "resources", APP_PROPERTIES);
+            try (InputStream is = new FileInputStream(appProp.toString())) {
+                properties.load(is);
+            }
+            Map<String, String> paramsMap = params.stream()
+                    .collect(Collectors.toMap(s -> s.contains("=") ? s.split("=")[0].trim() : s,
+                            s -> s.contains("=") ? s.split("=")[1].trim() : s));
+            setInitValues(config, paramsMap);
+            setDefaultValues(config, properties, paramsMap);
+            return config;
         }
     }
 
-    private void setTopLimit(List<String> params, Properties properties, Config config) {
-        if (params.size() >= 8) {
-            int topLimit = Integer.parseInt(params.get(7));
-            config.setTopLimit(topLimit);
-        } else {
-            int topLimit = Integer.parseInt(properties.getProperty("topLimit"));
-            config.setTopLimit(topLimit);
-        }
+    private void setDefaultValues(Config config, Properties properties, Map<String, String> paramsMap) {
+        Set<ConfigValues> initConfigValues = paramsMap.keySet().stream()
+                .map(key -> valueOfIgnoreCase(key).orElse(null))
+                .collect(Collectors.toSet());
+        Set<ConfigValues> defaultConfigValues = new HashSet<>(Arrays.asList(ConfigValues.values()));
+        defaultConfigValues.removeAll(initConfigValues);
+        defaultConfigValues.forEach(configValue -> {
+            switch (configValue) {
+                case PATH:
+                    setDefaultFilePath(properties, config);
+                    break;
+                case FILE_NAME:
+                    config.setFileName(properties.getProperty("file_name"));
+                    break;
+                case TOP_FILE_NAME:
+                    config.setTopFileName(properties.getProperty("top_file_name"));
+                    break;
+                case HEIGHT:
+                    String height = properties.getProperty("height");
+                    config.setHeight(Integer.parseInt(height));
+                    break;
+                case PAGES_LIMIT:
+                    String pagesLimit = properties.getProperty("pages_limit");
+                    config.setPagesLimit(Long.parseLong(pagesLimit));
+                    break;
+                case TOP_LIMIT:
+                    String topLimit = properties.getProperty("top_limit");
+                    config.setTopLimit(Integer.parseInt(topLimit));
+                    break;
+            }
+        });
     }
 
-    private void setPagesLimit(List<String> params, Properties properties, Config config) {
-        long pagesLimit;
-        if (params.size() >= 7) {
-            pagesLimit = Long.parseLong(params.get(6));
-        } else {
-            pagesLimit = Long.parseLong(properties.getProperty("pagesLimit"));
-        }
-        config.setPagesLimit(pagesLimit);
+    private void setInitValues(Config config, Map<String, String> paramsMap) {
+        paramsMap.forEach((key, value) -> {
+            Optional<ConfigValues> optionalValue = valueOfIgnoreCase(key);
+            if (optionalValue.isPresent()) {
+                switch (optionalValue.get()) {
+                    case URL:
+                        config.setRootUrl(value);
+                        break;
+                    case PATH:
+                        config.setPath(value);
+                        break;
+                    case FILE_NAME:
+                        config.setFileName(value);
+                        break;
+                    case TOP_FILE_NAME:
+                        config.setTopFileName(value);
+                        break;
+                    case TAGS:
+                        setTags(value, config);
+                        break;
+                    case HEIGHT:
+                        config.setHeight(Integer.parseInt(value));
+                        break;
+                    case TOP_LIMIT:
+                        config.setTopLimit(Integer.parseInt(value));
+                        break;
+                    case PAGES_LIMIT:
+                        config.setPagesLimit(Long.parseLong(value));
+                        break;
+                }
+            }
+        });
     }
 
-    private void setHeight(List<String> params, Properties properties, Config config) {
-        int height;
-        if (params.size() >= 6) {
-            height = Integer.parseInt(params.get(5));
-        } else {
-            height = Integer.parseInt(properties.getProperty("height"));
-        }
-        config.setHeight(height);
+    public void setDefaultFilePath(Properties properties, Config config) {
+        String[] paths = properties.getProperty("path").split(",");
+        String[] addPath = Arrays.copyOfRange(paths, 1, paths.length);
+        Path filePath = Path.of(paths[0], addPath);
+        config.setPath(filePath.toString());
     }
 
-    private void setTopFileName(List<String> params, Properties properties, Config config) {
-        if (params.size() >= 5) {
-            config.setTopFileName(params.get(4));
-        } else {
-            config.setTopFileName(properties.getProperty("topFileName"));
-        }
-    }
-
-    private void setFileName(List<String> params, Properties properties, Config config) {
-        if (params.size() >= 4) {
-            config.setFileName(params.get(3));
-        } else {
-            config.setFileName(properties.getProperty("fileName"));
-        }
-    }
-
-    private void setFilePath(List<String> params, Properties properties, Config config) {
-        if (params.size() >= 3) {
-            config.setPath(params.get(2));
-        } else {
-            String[] paths = properties.getProperty("path").split(",");
-            String[] addPath = Arrays.copyOfRange(paths, 1, paths.length - 1);
-            Path filePath = Path.of(paths[0], addPath);
-            config.setPath(filePath.toString());
-        }
+    private void setTags(String value, Config config) {
+        List<String> tags = Arrays.asList(value.split(","));
+        config.setTags(tags);
     }
 }
