@@ -4,6 +4,7 @@ import com.softeq.crawler.config.Config;
 import com.softeq.crawler.creator.ConfigCreator;
 import com.softeq.crawler.creator.Creator;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

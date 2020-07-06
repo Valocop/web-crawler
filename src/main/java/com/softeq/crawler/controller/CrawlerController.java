@@ -27,7 +27,7 @@ import java.util.List;
 
 @Log4j
 public class CrawlerController {
-    private StatisticsService service;
+    private final StatisticsService service;
 
     public CrawlerController(StatisticsService service) {
         this.service = service;

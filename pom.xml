@@ -48,6 +48,11 @@
             <artifactId>mockito-core</artifactId>
             <version>3.3.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -57,6 +62,31 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.softeq</groupId>
+                        <artifactId>web-crawler</artifactId>
+                        <version>1.0-SNAPSHOT</version>
+                        <type>jar</type>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>java</executable>
+                    <includePluginDependencies>true</includePluginDependencies>
+                    <mainClass>com.softeq.crawler.controller.CrawlerController</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
                 <version>3.8.0</version>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -64,31 +94,6 @@
                     <source>11</source>
                     <target>11</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.1.1</version>
-                <executions>
-                    <execution>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>com.softeq.crawler.controller.CrawlerController</mainClass>
-                            <arguments>
-                                <argument>url=https://en.wikipedia.org/wiki/Elon_Musk</argument>
-                                <argument>tags=Tesla,Musk,Gigafactory,Elon Musk"</argument>
-                                <argument>path=C:\test</argument>
-                                <argument>file_name=test.csv</argument>
-                                <argument>top_file_name=top_test.csv</argument>
-                                <argument>height=2</argument>
-                                <argument>pages_limit=25</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
